@@ -1,7 +1,6 @@
 package com.example.lab6
 
-import com.example.lab6.CityInfoResponse
-
+import CityViewModel
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,9 +8,13 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.lab6.City
+import com.example.lab6.CityAdapter
+import com.example.lab6.DetailsActivity
+import com.example.lab6.R
 
 class MainActivity : AppCompatActivity() {
-    private val viewModel: UrbanAreaViewModel by viewModels()
+    private val viewModel: CityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,21 +23,18 @@ class MainActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val adapter = CityAdapter(listOf()) { city ->
+        val adapter = CityAdapter { city ->
             val intent = Intent(this, DetailsActivity::class.java)
-            intent.putExtra("city_id", city.geoname_id.toString())  // Suponiendo que 'geoname_id' es un atributo de tu clase de ciudad
+            intent.putExtra("city_id", city.id) // Usamos "id" en lugar de "geoname_id"
             startActivity(intent)
         }
         recyclerView.adapter = adapter
 
         viewModel.cities.observe(this) { cities ->
             Log.d("MainActivity", "Cities: $cities")
-            adapter.cities = cities // Asumiendo que tu adaptador maneja una lista de ciudades
-            adapter.notifyDataSetChanged()
+            adapter.submitList(cities) // Utiliza submitList para actualizar la lista de ciudades
         }
 
-        // Aquí puedes realizar las llamadas iniciales para obtener los datos.
-        // Considera el flujo de usuario y cuándo es lógico cargar ciertos tipos de datos.
-        viewModel.getCities()
+        viewModel.findCities("city_name") // Debes proporcionar el nombre de la ciudad que deseas buscar
     }
 }
